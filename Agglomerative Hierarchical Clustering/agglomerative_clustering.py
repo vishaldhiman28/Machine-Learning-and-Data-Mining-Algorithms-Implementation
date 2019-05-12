@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri May 10 23:22:42 2019
+Created on Fri May 10 
 
 @author: Vishal Dhiman
 """
@@ -190,13 +190,7 @@ class H_clustering:
         d=np.linalg.norm(np.array(self.centroids[i])-np.array(self.centroids[min_i]))
         return d
     
-    
-        
-        
-        
-   
-        
-        
+          
 def gen_ran_data():
         print("\nWant to generate random data then give details:")
         n=int(input("\nHow many centers?")) 
