@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri May 10 
+Created on Fri May 10
 
 @author: Vishal Dhiman
 """
@@ -8,7 +8,8 @@ Created on Fri May 10
 import numpy as np
 import sys
 from matplotlib import pyplot as plt
-
+import pandas as pd
+import time 
 
 
 class H_clustering:
@@ -22,7 +23,7 @@ class H_clustering:
         self.no_of_dataset=data.shape[0]
         self.clusters={}
         self.centroids={}
-        self.available_color=['r','y','b','g','m']
+        self.available_color=['r','g','b','w','c','m','y','k']
         self.points_in_cluster={}
         self.uniq_cluster=[]
     def plot_clusters(self):
@@ -48,21 +49,23 @@ class H_clustering:
             self.points_in_cluster[_index]=np.where(req_cluster==_index)
             
     
-        print(req_cluster)
+        #print(req_cluster)
         #print(self.points_in_cluster)
-        #print(self.centroids)
-        _cl=0
+        print("\n[OUT]:Unique number of cluster:",self.uniq_cluster)
         
+        _ci=0
         for i in self.uniq_cluster:
             for j in np.nditer(self.points_in_cluster[i]):
-                _mt.scatter(self.data[j,0],self.data[j,1],c=self.available_color[_cl])
-            _cl=_cl+1  
-        
+                _mt.scatter(self.data[j,0],self.data[j,1],c=self.available_color[_ci])
+                
+            _ci+=1
+            if _ci==8:
+                _ci=0
         plt.show()
         
     def cal_homogenity(self):
         
-        print("\nCalculating Homogenity of Clusters  : ")
+        print("\n[OUT]:Calculating Homogenity of Clusters  : ")
         homogenity={}
         for i in self.uniq_cluster:
             
@@ -79,11 +82,11 @@ class H_clustering:
             for j in range(0,len(l)):
                   l[j]=(l[j]-_min)/(_max-_min)
             homogenity[i]=sum(l)
-            print("\n Homogenity of each point in cluster  {} is : \n {} ".format(str(i),str(homogenity[i])))
+            print("\n[OUT]: Homogenity of each point in cluster  {} is : \n {} ".format(str(i),str(homogenity[i])))
     
         
     def cal_seperation(self):
-        print("\nCalculating Seperation of Clusters: ")
+        print("\n[OUT]: Calculating Seperation of Clusters: ")
         
         l_c=self.uniq_cluster
         m=len(l_c)
@@ -102,11 +105,11 @@ class H_clustering:
                              sep+=np.linalg.norm(np.array(self.data[k])-np.array(self.data[l]))
                              count+=1
                        if count!=0:
-                           print("\nSeperation between cluster {} and {} is : {}".format(str(i),str(j),str(sep/count)))    
+                           print("\n[OUT]: Seperation between cluster {} and {} is : {}".format(str(i),str(j),str(sep/count)))    
                        else:
-                           print("\nSeperstion errot: count=0 ")
+                           print("\n[OUT]: Seperstion errot: count=0 ")
         else :
-            print("\nInsufficent number of clusters to find sepearion")
+            print("\n [OUT]: Insufficent number of clusters to find sepearion")
             
             
     def change_no_of_cluster(self,_nc):
@@ -120,6 +123,7 @@ class H_clustering:
         #print(dist_mat)
         np.fill_diagonal(dist_mat,sys.maxsize)
         #print(dist_mat)
+        print()
         self.do_clustering(dist_mat)
     
     
@@ -140,11 +144,12 @@ class H_clustering:
             _min=sys.maxsize
             
             for i in range(0,self.no_of_dataset):
-                for j in range(0,self.no_of_dataset):
+                for j in range(0,i):
                     if(dist_mat[i][j]<=_min):
                         _min=dist_mat[i][j]
                         index_r=i
                         index_c=j
+                        
         
             #merging clusters with min distance between them
             min_i=min(index_c,index_r)
@@ -152,12 +157,13 @@ class H_clustering:
             for i in range(0,len(l)):
                 if(l[i]==max_i):
                     l[i]=min_i
+                    
             #print("\n",min_i,max_i)        
             self.clusters[p]=l.copy()
             
             #centroid of merged clusters
             self.centroid_after_merge(min_i,l)
-            
+             
             #updating distance matrix after merging 
             for i in range(0,self.no_of_dataset):
                 if(i!=index_r and i!=index_c):
@@ -171,6 +177,7 @@ class H_clustering:
                 dist_mat[max_i][i]=sys.maxsize
                 dist_mat[i][max_i]=sys.maxsize
             #print(p,dist_mat)
+            print("\niteration:",p)
             
     def centroid_after_merge(self,min_i,l):
         count=0
@@ -190,10 +197,11 @@ class H_clustering:
         d=np.linalg.norm(np.array(self.centroids[i])-np.array(self.centroids[min_i]))
         return d
     
-          
+    
+        
 def gen_ran_data():
-        print("\nWant to generate random data then give details:")
-        n=int(input("\nHow many centers?")) 
+        print("\n[OUT]: Want to generate random data then give details:")
+        n=int(input("\n[OUT]: How many centers?")) 
         _center_list=[]
         for i in range(n):
             mes="\n"+str(i+1)+" center:"
@@ -219,29 +227,67 @@ def gen_ran_data():
         plt.show()
         #print(_data)    
         return _data
+
+def read_data():
+    print("\n [OUT]: ------ reading data from file --------");
+    fname=input("[IN]: \nEnter file name:")
     
-        
+    df=pd.read_table(fname,sep="\n",header=None)
+    data=[]
+    #print(df[0][1].split())
+
+    j=0
+    for i in  range(0,df.shape[0]):
+        #if(i%2==0 and i%3!=0 and i%4!=0):
+        if(i%8==0):
+            data.append(df[0][j].split())
+            data[j][0]=float(data[j][0])
+            data[j][1]=float(data[j][1])
+            j+=1
+    data=np.array(data)
+    #print(data)
+    
+    print("\n[OUT]: -------Plotting original data------")
+    plt.style.use('ggplot')
+    fig=plt.figure()
+    fig.suptitle('Original Data')
+    _mt=fig.add_subplot(1,1,1)
+    _mt.set_xlabel('x')
+    _mt.set_ylabel('y')
+    
+    plt.scatter(data[:,0],data[:,1])
+    plt.show()
+    return data        
 if __name__ == '__main__':
     
-    _data=gen_ran_data()
+    start_t=time.time()
+    _data=read_data()
+    #_data=gen_ran_data()
     #print(_data)
     
-    _Cn=int(input("\nHow many cluster do you want to find in agglomerative clustering? :\t"))
+    _Cn=int(input("\n[IN]: How many cluster do you want to find in agglomerative clustering? :\t"))
     #print(_data.shape)
     obj_agglo=H_clustering(_Cn,np.array(_data))
     obj_agglo.aglo_clustering()
+    
     obj_agglo.plot_clusters()
+
     obj_agglo.cal_homogenity()
     obj_agglo.cal_seperation()
-    option=input("\nHave You changed your mind w.r.t number of cluster do you want  to see?(yes,no) :\t")
+    end_t=time.time()-start_t
+    print("\n[OUT] : Time taken till now {}s ".format(str(round(end_t,4))))
+    
+    option=input("\n[IN]: Have You changed your mind w.r.t number of cluster do you want  to see?(yes,no) :\t")
     
     while option.lower()=='yes':
-        _Cn=int(input("\nThen, How many cluster do you want to find? :\t"))
+        _Cn=int(input("\n[IN]: Then, How many cluster do you want to find? :\t"))
+        start_t=time.time()
         obj_agglo.change_no_of_cluster(_Cn)
         obj_agglo.plot_clusters()
         
         obj_agglo.cal_homogenity()
         obj_agglo.cal_seperation()
-        option=input("\n Again change of mind?(yes,no) :\t")
-        
+        end_t=time.time()-start_t
+        print("\n[OUT] : Again time taken for new clusters {}s ".format(str(round(end_t,4))))
+        option=input("\n[IN]: Again change of mind?(yes,no) :\t") 
         
